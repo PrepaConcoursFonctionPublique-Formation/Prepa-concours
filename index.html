@@ -76,18 +76,28 @@ document.getElementById("demarrer").addEventListener("click",async function(){
  const disponibles=matiere==="Toutes"?banque:banque.filter(q=>q.matiere===matiere);
  if(disponibles.length<5){alert("Il n'y a pas assez de questions pour cette matière.");return;}
  envoiEnCours=true;this.disabled=true;this.textContent="Enregistrement...";
- try
- {const { error } = await supabase
-  .from("candidates")
-  .insert({
-    full_name: `${prenom} ${nom}`,
-    phone: telephone,
-    study_level: niveau
-  });
-   if(error)throw error;
-   candidatId=data.id;candidat={nom,prenom,telephone,niveau,matiere};
- }catch(err){alert("Inscription non enregistrée : "+err.message);return;}
- finally{envoiEnCours=false;this.disabled=false;this.textContent="Commencer l'épreuve";}
+ try{
+   const { error } = await supabase
+     .from("candidates")
+     .insert({
+       full_name: `${prenom} ${nom}`,
+       phone: telephone,
+       study_level: niveau
+     });
+   if (error) throw error;
+
+   // L'inscription est enregistrée. Aucun SELECT public n'est demandé.
+   candidat = { nom, prenom, telephone, niveau, matiere };
+ } catch (err) {
+   console.error("Erreur inscription Supabase :", err);
+   alert("Inscription non enregistrée : " + (err?.message || "Erreur inconnue") +
+         "\\nVérifie aussi les règles RLS de la table candidates.");
+   return;
+ } finally {
+   envoiEnCours = false;
+   this.disabled = false;
+   this.textContent = "Commencer l'épreuve";
+ }
  questions=melanger(disponibles).slice(0,5);numero=0;score=0;reponses=[];tempsRestant=300;verrouille=false;
  inscription.classList.add("cache");resultats.classList.add("cache");epreuve.classList.remove("cache");afficherQuestion();afficherTemps();clearInterval(horloge);
  horloge=setInterval(()=>{tempsRestant--;afficherTemps();if(tempsRestant<=0)terminerEpreuve(true);},1000);
