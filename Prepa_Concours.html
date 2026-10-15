@@ -1,0 +1,579 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concours Fonction Publique 🇧🇫 | QCM & Prépa</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 15px;
+  background: #f1f5f9;
+  font-family: Arial, sans-serif;
+  color: #172033;
+}
+
+header {
+  background: #064e3b;
+  color: white;
+  padding: 22px 15px;
+  text-align: center;
+  border-radius: 14px;
+  margin-bottom: 18px;
+}
+
+header h1 { margin: 0 0 8px; font-size: 23px; }
+header p { margin: 0; }
+
+.carte {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 15px;
+  box-shadow: 0 3px 12px #00000010;
+}
+
+h2 { color: #065f46; font-size: 21px; }
+
+label {
+  display: block;
+  margin-top: 14px;
+  font-weight: bold;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 7px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+}
+
+button {
+  border: none;
+  padding: 13px;
+  border-radius: 9px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.principal {
+  background: #047857;
+  color: white;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.secondaire {
+  background: #e2e8f0;
+  color: #172033;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.info {
+  background: #ecfdf5;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 15px;
+  line-height: 1.6;
+}
+
+.cache { display: none; }
+
+#barre {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+#chronometre { color: #b91c1c; }
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  font-weight: normal;
+}
+
+.option input {
+  width: auto;
+  margin: 3px 0 0;
+}
+
+.question-detail {
+  padding: 12px;
+  border-radius: 8px;
+  margin: 12px 0;
+  line-height: 1.6;
+}
+
+.correct { background: #dcfce7; }
+.incorrect { background: #fee2e2; }
+
+.petite {
+  font-size: 13px;
+  color: #64748b;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🇧🇫 Prépa Concours 2027</h1>
+  <p>Entraîne-toi aujourd'hui, réussis demain !</p>
+</header>
+
+<section id="inscription" class="carte">
+  <h2>Inscription du candidat</h2>
+  <p>Renseigne tes informations avant de commencer.</p>
+
+  <label for="nom">Nom</label>
+  <input id="nom" type="text" placeholder="Ton nom" required>
+
+  <label for="prenom">Prénom(s)</label>
+  <input id="prenom" type="text" placeholder="Tes prénoms" required>
+
+  <label for="telephone">Numéro de téléphone</label>
+  <input id="telephone" type="tel" placeholder="Ex. : 70 00 00 00" required>
+
+  <label for="matiere">Choisir une matière</label>
+  <select id="matiere">
+    <option value="Toutes">Toutes les matières</option>
+    <option value="Mathématiques">Mathématiques</option>
+    <option value="Français">Français</option>
+    <option value="Culture générale">Culture générale</option>
+    <option value="Psychotechnique">Psychotechnique</option>
+  </select>
+
+  <div class="info">
+    <strong>Épreuve d'entraînement</strong><br>
+    5 questions · 5 minutes · 1 point par bonne réponse
+  </div>
+
+  <button class="principal" id="demarrer">Commencer l'épreuve</button>
+  <p class="petite">Démonstration locale : les données ne sont pas envoyées à un serveur.</p>
+</section>
+
+<section id="epreuve" class="carte cache">
+  <div id="barre">
+    <span id="progression">Question 1/5</span>
+    <span id="chronometre">05:00</span>
+  </div>
+
+  <p id="matiereQuestion" class="petite"></p>
+  <h2 id="texteQuestion"></h2>
+  <div id="choix"></div>
+  <p id="message"></p>
+
+  <button class="principal" id="suivant">Valider et continuer</button>
+</section>
+
+<section id="resultats" class="carte cache">
+  <h2>Résultats de l'épreuve</h2>
+  <div id="resume" class="info"></div>
+  <h3>Correction détaillée</h3>
+  <div id="correction"></div>
+
+  <button class="principal" id="recommencer">Nouvelle épreuve</button>
+</section>
+
+<script>
+const banque = [
+  // MATHÉMATIQUES
+  {
+    matiere: "Mathématiques",
+    texte: "Combien vaut 25 % de 200 ?",
+    choix: ["25", "40", "50", "75"],
+    bonne: 2,
+    explication: "25 % de 200 = 0,25 × 200 = 50."
+  },
+  {
+    matiere: "Mathématiques",
+    texte: "Résoudre : 2x + 6 = 14.",
+    choix: ["x = 3", "x = 4", "x = 5", "x = 10"],
+    bonne: 1,
+    explication: "2x = 14 − 6 = 8, donc x = 4."
+  },
+  {
+    matiere: "Mathématiques",
+    texte: "Quelle est la somme des angles d'un triangle dans la géométrie plane ?",
+    choix: ["90°", "180°", "270°", "360°"],
+    bonne: 1,
+    explication: "La somme des angles intérieurs d'un triangle est 180°."
+  },
+  {
+    matiere: "Mathématiques",
+    texte: "Quelle est la probabilité d'obtenir un 6 avec un dé équilibré à six faces ?",
+    choix: ["1/2", "1/3", "1/6", "6/1"],
+    bonne: 2,
+    explication: "Il y a une issue favorable parmi six issues équiprobables : 1/6."
+  },
+  {
+    matiere: "Mathématiques",
+    texte: "Développer (x + 3)².",
+    choix: ["x² + 9", "x² + 3x + 9", "x² + 6x + 9", "x² − 6x + 9"],
+    bonne: 2,
+    explication: "(x + 3)² = x² + 2 × x × 3 + 9 = x² + 6x + 9."
+  },
+
+  // FRANÇAIS
+  {
+    matiere: "Français",
+    texte: "Quel est le pluriel de « un journal » ?",
+    choix: ["Des journals", "Des journaux", "Des journales", "Des journal"],
+    bonne: 1,
+    explication: "Le pluriel de journal est journaux."
+  },
+  {
+    matiere: "Français",
+    texte: "Choisis la phrase correctement écrite.",
+    choix: [
+      "Ils ont mangés.",
+      "Ils on mangé.",
+      "Ils ont mangé.",
+      "Il ont manger."
+    ],
+    bonne: 2,
+    explication: "Avec l'auxiliaire avoir, le participe passé mangé ne s'accorde pas ici."
+  },
+  {
+    matiere: "Français",
+    texte: "Quel est le synonyme de « rapide » ?",
+    choix: ["Lent", "Vif", "Faible", "Calme"],
+    bonne: 1,
+    explication: "Vif peut signifier rapide selon le contexte."
+  },
+  {
+    matiere: "Français",
+    texte: "Dans « Le candidat réussit », quel est le sujet ?",
+    choix: ["Le candidat", "Réussit", "Le", "Candidat réussit"],
+    bonne: 0,
+    explication: "Le candidat est le groupe nominal sujet du verbe réussit."
+  },
+  {
+    matiere: "Français",
+    texte: "Quel mot est un adverbe ?",
+    choix: ["Beau", "Beauté", "Rapidement", "Courir"],
+    bonne: 2,
+    explication: "Rapidement est un adverbe de manière."
+  },
+
+  // CULTURE GÉNÉRALE
+  {
+    matiere: "Culture générale",
+    texte: "Quelle est la capitale du Burkina Faso ?",
+    choix: ["Bobo-Dioulasso", "Koudougou", "Ouagadougou", "Banfora"],
+    bonne: 2,
+    explication: "Ouagadougou est la capitale du Burkina Faso."
+  },
+  {
+    matiere: "Culture générale",
+    texte: "Quelle institution adopte les lois dans un système parlementaire classique ?",
+    choix: ["Le Parlement", "La mairie", "La police", "La banque centrale"],
+    bonne: 0,
+    explication: "Le Parlement exerce généralement le pouvoir législatif."
+  },
+  {
+    matiere: "Culture générale",
+    texte: "Combien de jours compte une année bissextile ?",
+    choix: ["364", "365", "366", "367"],
+    bonne: 2,
+    explication: "Une année bissextile compte 366 jours."
+  },
+  {
+    matiere: "Culture générale",
+    texte: "Quel océan borde la côte occidentale de l'Afrique ?",
+    choix: ["Océan Indien", "Océan Atlantique", "Océan Arctique", "Océan Austral"],
+    bonne: 1,
+    explication: "La façade occidentale de l'Afrique donne sur l'océan Atlantique."
+  },
+  {
+    matiere: "Culture générale",
+    texte: "Quelle est la monnaie commune utilisée par les pays de l'UEMOA ?",
+    choix: ["Le naira", "Le cedi", "Le franc CFA BCEAO", "Le dalasi"],
+    bonne: 2,
+    explication: "Les pays membres de l'UEMOA utilisent le franc CFA émis par la BCEAO."
+  },
+
+  // PSYCHOTECHNIQUE
+  {
+    matiere: "Psychotechnique",
+    texte: "Complète la suite : 2, 4, 6, 8, ...",
+    choix: ["9", "10", "11", "12"],
+    bonne: 1,
+    explication: "On ajoute 2 à chaque étape. Le nombre suivant est 10."
+  },
+  {
+    matiere: "Psychotechnique",
+    texte: "Quel élément est différent des autres ?",
+    choix: ["Carré", "Triangle", "Cercle", "Banane"],
+    bonne: 3,
+    explication: "La banane est un fruit ; les autres sont des formes géométriques."
+  },
+  {
+    matiere: "Psychotechnique",
+    texte: "Complète : A, C, E, G, ...",
+    choix: ["H", "I", "J", "K"],
+    bonne: 1,
+    explication: "La suite avance d'une lettre sur deux : A, C, E, G, I."
+  },
+  {
+    matiere: "Psychotechnique",
+    texte: "Paul est plus grand que Jean. Jean est plus grand que Marc. Qui est le plus petit ?",
+    choix: ["Paul", "Jean", "Marc", "Impossible à savoir"],
+    bonne: 2,
+    explication: "Paul > Jean > Marc. Marc est le plus petit."
+  },
+  {
+    matiere: "Psychotechnique",
+    texte: "Trouve le nombre manquant : 3, 6, 12, 24, ...",
+    choix: ["30", "36", "42", "48"],
+    bonne: 3,
+    explication: "Chaque nombre est multiplié par 2. Le suivant est 48."
+  }
+];
+
+let questions = [];
+let numero = 0;
+let score = 0;
+let reponses = [];
+let tempsRestant = 300;
+let horloge = null;
+let verrouille = false;
+let candidat = {};
+
+const inscription = document.getElementById("inscription");
+const epreuve = document.getElementById("epreuve");
+const resultats = document.getElementById("resultats");
+
+function melanger(tableau) {
+  return tableau
+    .map(item => ({ item, tri: Math.random() }))
+    .sort((a, b) => a.tri - b.tri)
+    .map(objet => objet.item);
+}
+
+document.getElementById("demarrer").addEventListener("click", function() {
+  const nom = document.getElementById("nom").value.trim();
+  const prenom = document.getElementById("prenom").value.trim();
+  const telephone = document.getElementById("telephone").value.trim();
+  const matiere = document.getElementById("matiere").value;
+
+  if (!nom || !prenom || !telephone) {
+    alert("Remplis le nom, le prénom et le numéro de téléphone.");
+    return;
+  }
+
+  candidat = { nom, prenom, telephone, matiere };
+
+  const disponibles = matiere === "Toutes"
+    ? banque
+    : banque.filter(q => q.matiere === matiere);
+
+  questions = melanger(disponibles).slice(0, 5);
+  numero = 0;
+  score = 0;
+  reponses = [];
+  tempsRestant = 300;
+  verrouille = false;
+
+  inscription.classList.add("cache");
+  resultats.classList.add("cache");
+  epreuve.classList.remove("cache");
+
+  afficherQuestion();
+  afficherTemps();
+
+  clearInterval(horloge);
+  horloge = setInterval(function() {
+    tempsRestant--;
+    afficherTemps();
+
+    if (tempsRestant <= 0) {
+      terminerEpreuve(true);
+    }
+  }, 1000);
+});
+
+function afficherTemps() {
+  const minutes = Math.floor(tempsRestant / 60);
+  const secondes = tempsRestant % 60;
+
+  document.getElementById("chronometre").textContent =
+    String(minutes).padStart(2, "0") + ":" +
+    String(secondes).padStart(2, "0");
+}
+
+function afficherQuestion() {
+  verrouille = false;
+
+  const q = questions[numero];
+
+  document.getElementById("progression").textContent =
+    "Question " + (numero + 1) + "/" + questions.length;
+
+  document.getElementById("matiereQuestion").textContent =
+    "Matière : " + q.matiere;
+
+  document.getElementById("texteQuestion").textContent = q.texte;
+  document.getElementById("message").textContent = "";
+
+  const zoneChoix = document.getElementById("choix");
+  zoneChoix.innerHTML = "";
+
+  q.choix.forEach(function(option, index) {
+    const label = document.createElement("label");
+    label.className = "option";
+
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = "reponse";
+    radio.value = index;
+
+    const texte = document.createElement("span");
+    texte.textContent = option;
+
+    label.appendChild(radio);
+    label.appendChild(texte);
+    zoneChoix.appendChild(label);
+  });
+
+  document.getElementById("suivant").textContent =
+    numero === questions.length - 1
+      ? "Terminer l'épreuve"
+      : "Valider et continuer";
+}
+
+document.getElementById("suivant").addEventListener("click", function() {
+  if (verrouille) return;
+
+  const selection = document.querySelector('input[name="reponse"]:checked');
+
+  if (!selection) {
+    alert("Choisis une réponse avant de continuer.");
+    return;
+  }
+
+  const choixCandidat = Number(selection.value);
+  const q = questions[numero];
+
+  reponses.push(choixCandidat);
+
+  if (choixCandidat === q.bonne) {
+    score++;
+  }
+
+  numero++;
+
+  if (numero >= questions.length) {
+    terminerEpreuve(false);
+  } else {
+    afficherQuestion();
+  }
+});
+
+function terminerEpreuve(finDuTemps) {
+  if (verrouille) return;
+  verrouille = true;
+
+  clearInterval(horloge);
+
+  epreuve.classList.add("cache");
+  resultats.classList.remove("cache");
+
+  const total = questions.length;
+  const pourcentage = Math.round((score / total) * 100);
+  const erreurs = total - score;
+
+  document.getElementById("resume").innerHTML = `
+    <strong>Candidat :</strong> ${echapper(candidat.prenom)} ${echapper(candidat.nom)}<br>
+    <strong>Téléphone :</strong> ${echapper(candidat.telephone)}<br>
+    <strong>Matière choisie :</strong> ${echapper(candidat.matiere)}<br>
+    <hr>
+    <strong>Score :</strong> ${score}/${total}<br>
+    <strong>Pourcentage :</strong> ${pourcentage}%<br>
+    <strong>Bonnes réponses :</strong> ${score}<br>
+    <strong>Erreurs ou questions non répondues :</strong> ${erreurs}<br>
+    <strong>Temps écoulé :</strong> ${finDuTemps ? "Oui" : "Non"}<br>
+    <strong>Appréciation :</strong> ${appreciation(pourcentage)}
+  `;
+
+  const correction = document.getElementById("correction");
+  correction.innerHTML = "";
+
+  questions.forEach(function(q, index) {
+    const reponse = reponses[index];
+    const juste = reponse === q.bonne;
+
+    const bloc = document.createElement("div");
+    bloc.className = "question-detail " + (juste ? "correct" : "incorrect");
+
+    const titre = document.createElement("strong");
+    titre.textContent = (index + 1) + ". " + q.texte;
+
+    const statut = document.createElement("p");
+    statut.textContent = juste
+      ? "✅ Bonne réponse"
+      : "❌ Mauvaise réponse ou absence de réponse";
+
+    const taReponse = document.createElement("p");
+    taReponse.textContent = "Ta réponse : " +
+      (reponse === undefined ? "Aucune" : q.choix[reponse]);
+
+    const bonneReponse = document.createElement("p");
+    bonneReponse.textContent = "Réponse correcte : " + q.choix[q.bonne];
+
+    const explication = document.createElement("p");
+    explication.textContent = "Explication : " + q.explication;
+
+    bloc.append(titre, statut, taReponse, bonneReponse, explication);
+    correction.appendChild(bloc);
+  });
+
+  window.scrollTo(0, 0);
+}
+
+function appreciation(pourcentage) {
+  if (pourcentage >= 80) return "Excellent travail !";
+  if (pourcentage >= 60) return "Bon effort, continue à progresser.";
+  if (pourcentage >= 40) return "Résultat moyen : révise tes erreurs.";
+  return "Il faut davantage t'entraîner. Ne te décourage pas.";
+}
+
+function echapper(texte) {
+  return String(texte).replace(/[&<>"']/g, function(caractere) {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[caractere];
+  });
+}
+
+document.getElementById("recommencer").addEventListener("click", function() {
+  clearInterval(horloge);
+  resultats.classList.add("cache");
+  inscription.classList.remove("cache");
+  window.scrollTo(0, 0);
+});
+</script>
+
+</body>
+</html>
