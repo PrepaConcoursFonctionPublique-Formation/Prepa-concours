@@ -76,8 +76,14 @@ document.getElementById("demarrer").addEventListener("click",async function(){
  const disponibles=matiere==="Toutes"?banque:banque.filter(q=>q.matiere===matiere);
  if(disponibles.length<5){alert("Il n'y a pas assez de questions pour cette matière.");return;}
  envoiEnCours=true;this.disabled=true;this.textContent="Enregistrement...";
- try{
-   const {data,error}=await supabase.from("candidates").insert({full_name:`${prenom} ${nom}`,phone:telephone,study_level:niveau}).select("id").single();
+ try
+ {const { error } = await supabase
+  .from("candidates")
+  .insert({
+    full_name: `${prenom} ${nom}`,
+    phone: telephone,
+    study_level: niveau
+  });
    if(error)throw error;
    candidatId=data.id;candidat={nom,prenom,telephone,niveau,matiere};
  }catch(err){alert("Inscription non enregistrée : "+err.message);return;}
