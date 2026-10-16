@@ -46,7 +46,7 @@ function login(msg,ok){
  g("rg").onclick=()=>reg();
  g("go").onclick=async()=>{
   g("go").disabled=true;
-  try{const r=await fetch(URL_SB+"/functions/v1/login",{method:"POST",headers:{"Content-Type":"application/json",apikey:KEY},body:JSON.stringify({id:v("i"),password:g("p").value})});
+  try{const r=await fetch(URL_SB+"/functions/v1/smart-action",{method:"POST",headers:{"Content-Type":"application/json",apikey:KEY},body:JSON.stringify({id:v("i"),password:g("p").value})});
    const d=await r.json();if(!r.ok)return login(esc(d.error||"Connexion impossible"));
    await sb.auth.setSession({access_token:d.session.access_token,refresh_token:d.session.refresh_token});home()}
   catch(e){login("Erreur réseau, réessaie.")}};
