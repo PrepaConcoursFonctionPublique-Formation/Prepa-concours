@@ -84,7 +84,7 @@ function reg(msg){
   if(!/^\+226 ?\d{2} ?\d{2} ?\d{2} ?\d{2}$/.test(d.whatsapp))return reg("WhatsApp : format +226 XX XX XX XX.");
   if(p.length<8)return reg("Mot de passe : 8 caractères minimum.");
   g("go").disabled=true;
-  const{error}=await sb.auth.signUp({email:m,password:p,options:{data:d}});
+  const{error}=await sb.auth.signUp({email:m,password:p,options:{data:d,emailRedirectTo:location.origin+location.pathname}});
   if(error)return reg(esc(error.message));
   login("Compte créé. Confirme ton e-mail (vérifie aussi les spams), puis connecte-toi avec ton e-mail. Ton ID candidat s'affichera dans ton espace.",1)};
 }
